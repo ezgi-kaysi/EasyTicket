@@ -1,0 +1,74 @@
+version: '3.4'
+
+services:
+  easyticket.web:
+    image: ${DOCKER_REGISTRY-}easyticketweb
+    build:
+      context: .
+      dockerfile: EasyTicket.Client/Dockerfile
+    environment:
+      - ApiConfigs__EventCatalog__Uri=http://easyticket.services.eventcatalog
+      - ApiConfigs__ShoppingBasket__Uri=http://easyticket.services.shoppingbasket
+      - ApiConfigs__Discount__Uri=http://easyticket.services.discount
+      - ApiConfigs__Order__Uri=http://easyticket.services.ordering
+      - ApiConfigs__Marketing__Uri=http://easyticket.services.marketing
+    depends_on:
+      - easyticket.services.eventcatalog
+      - easyticket.services.shoppingbasket
+      - easyticket.services.discount
+      - easyticket.services.ordering
+      - easyticket.services.marketing
+
+
+  easyticket.services.eventcatalog:
+    image: ${DOCKER_REGISTRY-}easyticketserviceseventcatalog
+    build:
+      context: .
+      dockerfile: EasyTicket.Services.EventCatalog/Dockerfile
+
+  easyticket.services.shoppingbasket:
+    image: ${DOCKER_REGISTRY-}easyticketservicesshoppingbasket
+    build:
+      context: .
+      dockerfile: EasyTicket.Services.ShoppingBasket/Dockerfile
+    environment:
+      - ApiConfigs__EventCatalog__Uri=http://easyticket.services.eventcatalog
+      - ApiConfigs__Discount__Uri=http://easyticket.services.discount
+    depends_on:
+      - easyticket.services.eventcatalog
+  
+  external.paymentgateway:
+    image: ${DOCKER_REGISTRY-}externalpaymentgateway
+    build:
+      context: .
+      dockerfile: External.PaymentGateway/Dockerfile
+
+
+  easyticket.services.discount:
+    image: ${DOCKER_REGISTRY-}easyticketservicesdiscount
+    build:
+      context: .
+      dockerfile: EasyTicket.Services.Discount/Dockerfile
+
+
+  easyticket.services.marketing:
+    image: ${DOCKER_REGISTRY-}easyticketservicesmarketing
+    build:
+      context: .
+      dockerfile: EasyTicket.Services.Marketing/Dockerfile
+    environment:
+      - ApiConfigs__ShoppingBasket__Uri=http://easyticket.services.shoppingbasket
+    depends_on:
+      - easyticket.services.shoppingbasket
+
+  easyticket.services.ordering:
+    image: ${DOCKER_REGISTRY-}easyticketservicesordering
+    build:
+      context: .
+      dockerfile: EasyTicket.Services.Order/Dockerfile
+  
+  easyticket.services.payment:
+    image: ${DOCKER_REGISTRY-}easyticketservicespayment
+    build:
+      context: .
+      dockerfile: EasyTicket.Services.Payment/Dockerfile
